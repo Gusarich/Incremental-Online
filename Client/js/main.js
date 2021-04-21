@@ -17,7 +17,7 @@ function register () {
         })
 }
 
-function login () {
+function login (alerted) {
     let username = document.getElementById('username').value
     let password = document.getElementById('password').value
     fetch('http://localhost:1337/calculate?username=' + username + '&password=' + password)
@@ -28,19 +28,20 @@ function login () {
                 window.localStorage['_incremental_online_password'] = password
                 reload(response.data, response.timestamp)
                 tick()
-                document.getElementsByClassName('register')[0].style.display = 'none'
-                document.getElementsByClassName('balances')[0].style.display = ''
-                document.getElementsByClassName('generators')[0].style.display = ''
-                setInterval(tick, 50)
+                document.getElementsByClassName('register')[0].classList.add('hidden')
+                document.getElementsByClassName('balances')[0].classList.remove('hidden')
+                document.getElementsByClassName('generators')[0].classList.remove('hidden')
+                document.getElementsByClassName('upgrades')[0].classList.remove('hidden')
+                setInterval(tick, 200)
             }
-            else {
+            else if (alerted) {
                 alert(response.message)
             }
         })
 }
 
 function normalize (n) {
-    if (n.lt('1e5')) return n.toFixed(0)
+    if (n.lt('1e6')) return n.toFixed(0)
     else return n.toExponential(2)
 }
 
@@ -100,11 +101,14 @@ BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR })
 var data = {}
 
 window.onload = () => {
+    let y = document.getElementsByClassName('generators')[0].offsetTop
+    document.getElementsByClassName('upgrades')[0].style.top = y + 10 + 'px';
+
     if (window.localStorage.getItem('_incremental_online_username') != null) {
         let username = window.localStorage.getItem('_incremental_online_username')
         let password = window.localStorage.getItem('_incremental_online_password')
         document.getElementById('username').value = username
         document.getElementById('password').value = password
-        login()
+        login(false)
     }
 }

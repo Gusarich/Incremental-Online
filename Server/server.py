@@ -7,7 +7,6 @@ import sqlite3
 
 
 app = Flask(__name__)
-#cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 con = sqlite3.connect('db.sqlite', check_same_thread=False)

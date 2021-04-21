@@ -9,38 +9,54 @@
   </head>
   <body>
     <div class="register">
-      <input type="text" id="username" value="">
-      <input type="password" id="password" value="">
+      <input type="text" id="username" value="" placeholder="Username">
+      <input type="password" id="password" value="" placeholder="Password">
       <button type="button" onclick="register()">Register</button>
-      <button type="button" onclick="login()">Log-in</button>
+      <button type="button" onclick="login(true)">Log-in</button>
     </div>
 
-    <div class="balances" style="display: none">
+    <div class="balances hidden">
         <span class="coins-num" id="balance-coins">10</span><span class="coins-label"> Coins</span>
     </div>
 
-    <div class="generators" style="display: none">
-        <div class="generator" onclick="purchaseGenerator(0)">
-            <span class="generator-label" style="font-size: 17px;">Coin generator</span>
-            <span class="generator-label">Amount: <span class="generator-num" id="generator1-amount">0</span></span>
-            <span class="generator-label">Mult: x<span class="generator-num" id="generator1-mult">1.00</span></span>
-            <span class="generator-label">Producing: <span class="generator-num" id="generator1-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
-            <span class="generator-label">Cost: <span class="generator-num" id="generator1-cost">10</span> <span class="generator-label inlineblock">Coins</span></span>
+    <div class="omgitsbig">
+
+        <div class="generators hidden">
+            <div class="generator" onclick="purchaseGenerator(0)">
+                <span class="generator-label" style="font-size: 17px;">Coin generator</span>
+                <span class="generator-label">Amount: <span class="generator-num" id="generator1-amount">0</span></span>
+                <span class="generator-label">Mult: x<span class="generator-num" id="generator1-mult">1</span></span>
+                <span class="generator-label">Producing: <span class="generator-num" id="generator1-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
+                <span class="generator-label">Cost: <span class="generator-num" id="generator1-cost">10</span> <span class="generator-label inlineblock">Coins</span></span>
+            </div>
+            <div class="generator" onclick="purchaseGenerator(1)">
+                <span class="generator-label" style="font-size: 17px;">Coin^2 generator</span>
+                <span class="generator-label">Amount: <span class="generator-num" id="generator2-amount">0</span></span>
+                <span class="generator-label">Mult: x<span class="generator-num" id="generator2-mult">1</span></span>
+                <span class="generator-label">Producing: <span class="generator-num" id="generator2-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
+                <span class="generator-label">Cost: <span class="generator-num" id="generator2-cost">1000</span> <span class="generator-label inlineblock">Coins</span></span></span>
+            </div>
+            <div class="generator" onclick="purchaseGenerator(2)">
+                <span class="generator-label" style="font-size: 17px;">Coin^3 generator</span>
+                <span class="generator-label">Amount: <span class="generator-num" id="generator3-amount">0</span></span>
+                <span class="generator-label">Mult: x<span class="generator-num" id="generator3-mult">1</span></span>
+                <span class="generator-label">Producing: <span class="generator-num" id="generator3-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
+                <span class="generator-label">Cost: <span class="generator-num" id="generator3-cost">100000</span> <span class="generator-label inlineblock">Coins</span></span>
+            </div>
         </div>
-        <div class="generator" onclick="purchaseGenerator(1)">
-            <span class="generator-label" style="font-size: 17px;">Coin^2 generator</span>
-            <span class="generator-label">Amount: <span class="generator-num" id="generator2-amount">0</span></span>
-            <span class="generator-label">Mult: x<span class="generator-num" id="generator2-mult">1.00</span></span>
-            <span class="generator-label">Producing: <span class="generator-num" id="generator2-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
-            <span class="generator-label">Cost: <span class="generator-num" id="generator2-cost">10</span> <span class="generator-label inlineblock">Coins</span></span></span>
+
+        <div class="upgrades hidden">
+            <div class="upgrade">
+                <span class="upgrade-label" style="font-size: 17px;">123</span>
+            </div>
         </div>
-        <div class="generator" onclick="purchaseGenerator(2)">
-            <span class="generator-label" style="font-size: 17px;">Coin^3 generator</span>
-            <span class="generator-label">Amount: <span class="generator-num" id="generator3-amount">0</span></span>
-            <span class="generator-label">Mult: x<span class="generator-num" id="generator3-mult">1.00</span></span>
-            <span class="generator-label">Producing: <span class="generator-num" id="generator3-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
-            <span class="generator-label">Cost: <span class="generator-num" id="generator3-cost">10</span> <span class="generator-label inlineblock">Coins</span></span>
+
+        <div class="extra hidden">
+            <div class="">
+                <span>egor</span>
+            </div>
         </div>
+
     </div>
   </body>
 </html>
