@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Incremental Online</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="js/bignumber.js" charset="utf-8"></script>
+    <script src="js/main.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <div class="register">
+      <input type="text" id="username" value="">
+      <input type="password" id="password" value="">
+      <button type="button" onclick="register()">Register</button>
+      <button type="button" onclick="login()">Log-in</button>
+    </div>
+
+    <div class="balances" style="display: none">
+        <span class="coins-num" id="balance-coins">10</span><span class="coins-label"> Coins</span>
+    </div>
+
+    <div class="generators" style="display: none">
+        <div class="generator" onclick="purchaseGenerator(0)">
+            <span class="generator-label" style="font-size: 17px;">Coin generator</span>
+            <span class="generator-label">Amount: <span class="generator-num" id="generator1-amount">0</span></span>
+            <span class="generator-label">Mult: x<span class="generator-num" id="generator1-mult">1.00</span></span>
+            <span class="generator-label">Producing: <span class="generator-num" id="generator1-producing">0</span> <span class="generator-label inlineblock">/sec</span></span>
+            <span class="generator-label">Cost: <span class="generator-num" id="generator1-cost">10</span> <span class="generator-label inlineblock">Coins</span></span>
+        </div>
+        <div class="generator">
+            <span class="generator-label" style="font-size: 17px;">Coin^2 generator</span>
+            <span class="generator-label">Amount: <span class="generator-num">0</span></span>
+            <span class="generator-label">Mult: x<span class="generator-num">1.00</span></span>
+            <span class="generator-label">Producing: <span class="generator-num">0 <span class="generator-label inlineblock">/sec</span></span></span>
+            <span class="generator-label">Cost: <span class="generator-num">10 <span class="generator-label inlineblock">Coins</span></span></span>
+        </div>
+        <div class="generator">
+            <span class="generator-label" style="font-size: 17px;">Coin^3 generator</span>
+            <span class="generator-label">Amount: <span class="generator-num">0</span></span>
+            <span class="generator-label">Mult: x<span class="generator-num">1.00</span></span>
+            <span class="generator-label">Producing: <span class="generator-num">0 <span class="generator-label inlineblock">/sec</span></span></span>
+            <span class="generator-label">Cost: <span class="generator-num">10 <span class="generator-label inlineblock">Coins</span></span></span>
+        </div>
+    </div>
+  </body>
+</html>

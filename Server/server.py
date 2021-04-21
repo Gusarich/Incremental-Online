@@ -7,6 +7,9 @@ import sqlite3
 
 
 app = Flask(__name__)
+#cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 con = sqlite3.connect('db.sqlite', check_same_thread=False)
 cur = con.cursor()
 
@@ -19,11 +22,13 @@ cur.execute("""CREATE TABLE IF NOT EXISTS Users (
 
 CHARS = set(ascii_letters + digits)
 GAME_DATA = json.dumps({
-    'gold': 10,
+    'balances': {
+        'coins': 10,
+        'gold': 0
+    },
     'xp': 0,
     'mult': 1,
-    'crowns': 0,
-    'generators': [{'amount': 0, 'mult': 1}, {'amount': 1, 'mult': 1},]
+    'generators': [{'amount': 0, 'mult': 1}, {'amount': 0, 'mult': 1}, {'amount': 0, 'mult': 1}]
 })
 TICKSPEED = 10
 
@@ -54,9 +59,9 @@ def str_check(s, chars=''):
 
 
 def calculate(username):
+    current_time = timestamp()
     user = cur.execute(f"SELECT * FROM Users WHERE username = '{username}'").fetchone()
     last_time, game_data = user[2], user[3]
-    current_time = timestamp()
     d = json.loads(game_data)
     gs = d['generators']
 
@@ -68,7 +73,7 @@ def calculate(username):
         tick_mult = 1
 
     for _ in range(t):
-        d['gold'] += (gs[0]['amount'] * gs[0]['mult'] * d['mult']) / TICKSPEED * tick_mult
+        d['balances']['coins'] += (gs[0]['amount'] * gs[0]['mult'] * d['mult']) / TICKSPEED * tick_mult
         for i in range(1, len(gs)):
             gs[i - 1]['amount'] += (gs[i]['amount'] * gs[i]['mult']) / TICKSPEED * tick_mult
 
@@ -78,6 +83,12 @@ def calculate(username):
                     WHERE username = '{username}'""")
 
     return d
+
+
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 
 @app.route('/register', methods=['GET'])
@@ -121,6 +132,39 @@ def calculate_route():
                            username = '{username}' AND
                            password_hash = '{hash(password)}'""").fetchone():
         return response(success=False, message='wrong username or password')
+
+    return response(success=True, data=calculate(username))
+
+
+@app.route('/purchasegenerator', methods=['GET'])
+def purchasegenerator_route():
+    username = request.args.get('username', '')
+    password = request.args.get('password', '')
+    index = request.args.get('index', '-1')
+
+    if not index.isdigit() or int(index) < 0 or int(index) > 2:
+        return response(success=False, message='wrong index')
+
+    index = int(index)
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
+    data = calculate(username)
+
+    generator = data['generators'][index]
+
+    if data['balances']['coins'] < (10 ** (index * 2 + 1)) * 1.1 ** generator['amount']:
+        return response(success=False, message='not enough coins')
+
+    data['balances']['coins'] -= (10 ** (index * 2 + 1)) * 1.1 ** generator['amount']
+    generator['amount'] += 1
+
+    cur.execute(f"""UPDATE Users SET
+                    game_data = '{json.dumps(data)}'
+                    WHERE username = '{username}'""")
 
     return response(success=True, data=calculate(username))
 

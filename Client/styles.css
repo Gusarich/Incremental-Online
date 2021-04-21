@@ -1,0 +1,62 @@
+input {
+  display: block;
+  margin-bottom: 10px;
+}
+
+button {
+  width: 48%;
+  display: inline-block;
+}
+
+.register {
+  width: max-content;
+  text-align: center;
+}
+
+.balances {
+    text-align: center;
+}
+
+.coins-num {
+    font-size: 25px;
+}
+
+.coins-label {
+    font-size: 15px;
+}
+
+.generators {
+    width: max-content;
+}
+
+.generators div {
+    display: block;
+    margin: 10px;
+}
+
+.generator {
+    display: inline-block;
+    background-color: #7ac4f5;
+    width: 100%;
+    padding: 5px 10px;
+    margin-right: 152px;
+    border-width: 2px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #18d651;
+}
+
+.generator-num {
+    font-size: 20px;
+    text-align: right;
+}
+
+.generator-label {
+    display: block;
+    font-size: 13px;
+    text-align: center;
+}
+
+.inlineblock {
+    display: inline-block;
+}
