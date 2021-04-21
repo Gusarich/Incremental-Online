@@ -28,7 +28,7 @@ GAME_DATA = json.dumps({
     },
     'xp': 0,
     'mult': 1,
-    'generators': [{'amount': 0, 'mult': 1}, {'amount': 0, 'mult': 1}, {'amount': 0, 'mult': 1}]
+    'generators': [{'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}]
 })
 TICKSPEED = 10
 
@@ -41,10 +41,11 @@ def timestamp():
     return int(time() * 1000)
 
 
-def response(success, message=None, data=None):
+def response(success, message=None, data=None, timestamp_=None):
     if success:
         return json.dumps({
             'success': 1,
+            'timestamp': timestamp_,
             'data': data
         })
     else:
@@ -59,30 +60,34 @@ def str_check(s, chars=''):
 
 
 def calculate(username):
-    current_time = timestamp()
     user = cur.execute(f"SELECT * FROM Users WHERE username = '{username}'").fetchone()
     last_time, game_data = user[2], user[3]
     d = json.loads(game_data)
     gs = d['generators']
 
-    t = int((current_time - last_time) / (1000 / TICKSPEED))
+    t = int((timestamp() - last_time) / (1000 / TICKSPEED))
+
     if t > 250000:
         tick_mult = t / 250000
         t = 250000
     else:
         tick_mult = 1
 
-    for _ in range(t):
+    t = timestamp()
+
+    while last_time < t:
         d['balances']['coins'] += (gs[0]['amount'] * gs[0]['mult'] * d['mult']) / TICKSPEED * tick_mult
         for i in range(1, len(gs)):
             gs[i - 1]['amount'] += (gs[i]['amount'] * gs[i]['mult']) / TICKSPEED * tick_mult
+        last_time += 1000 // TICKSPEED
+        t = timestamp()
 
     cur.execute(f"""UPDATE Users SET
-                    last_time = {current_time},
+                    last_time = {t},
                     game_data = '{json.dumps(d)}'
                     WHERE username = '{username}'""")
 
-    return d
+    return d, t
 
 
 @app.after_request
@@ -120,7 +125,8 @@ def register_route():
         print(e)
         return response(success=False, message='unknown error')
 
-    return response(success=True, data={'registered': True})
+    data, timestamp_ = calculate(username)
+    return response(success=True, data={'registered': True}, timestamp_=timestamp_)
 
 
 @app.route('/calculate', methods=['GET'])
@@ -133,7 +139,8 @@ def calculate_route():
                            password_hash = '{hash(password)}'""").fetchone():
         return response(success=False, message='wrong username or password')
 
-    return response(success=True, data=calculate(username))
+    data, timestamp_ = calculate(username)
+    return response(success=True, data=data, timestamp_=timestamp_)
 
 
 @app.route('/purchasegenerator', methods=['GET'])
@@ -152,21 +159,24 @@ def purchasegenerator_route():
                            password_hash = '{hash(password)}'""").fetchone():
         return response(success=False, message='wrong username or password')
 
-    data = calculate(username)
+    data, timestamp_ = calculate(username)
 
     generator = data['generators'][index]
 
-    if data['balances']['coins'] < (10 ** (index * 2 + 1)) * 1.1 ** generator['amount']:
+    if data['balances']['coins'] < (10 ** (index * 2 + 1)) * 1.1 ** generator['bought']:
         return response(success=False, message='not enough coins')
 
-    data['balances']['coins'] -= (10 ** (index * 2 + 1)) * 1.1 ** generator['amount']
+    data['balances']['coins'] -= (10 ** (index * 2 + 1)) * 1.1 ** generator['bought']
     generator['amount'] += 1
+    generator['bought'] += 1
+    data['xp'] += 1 * data['mult']
 
     cur.execute(f"""UPDATE Users SET
                     game_data = '{json.dumps(data)}'
                     WHERE username = '{username}'""")
 
-    return response(success=True, data=calculate(username))
+    data, timestamp_ = calculate(username)
+    return response(success=True, data=data, timestamp_=timestamp_)
 
 
 if __name__ == '__main__':
