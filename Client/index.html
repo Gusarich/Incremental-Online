@@ -15,13 +15,45 @@
       <button type="button" onclick="login(true)">Log-in</button>
     </div>
 
-    <div class="balances hidden">
-        <span class="coins-num" id="balance-coins">10</span><span class="coins-label"> Coins</span>
+    <div class="links">
+        <a href="https://github.com/Gusarich/Incremental-Online">GitHub</a>
     </div>
 
-    <div class="omgitsbig">
+    <div class="hidden open-button" onclick="openLeaderboard()">
+        Leaderboard
+    </div>
 
-        <div class="generators hidden">
+    <div class="leaderboard" style="display: none">
+        <div class="close-button" onclick="closeLeaderboard()">
+            X
+        </div>
+        <span class="leaderboard-title">Leaderboard</span><br>
+        1. <span id="leaderboard-1"></span><br>
+        2. <span id="leaderboard-2"></span><br>
+        3. <span id="leaderboard-3"></span><br>
+        4. <span id="leaderboard-4"></span><br>
+        5. <span id="leaderboard-5"></span><br>
+        6. <span id="leaderboard-6"></span><br>
+        7. <span id="leaderboard-7"></span><br>
+        8. <span id="leaderboard-8"></span><br>
+        9. <span id="leaderboard-9"></span><br>
+        10. <span id="leaderboard-10"></span><br>
+        <span id="leaderboard-hidden" style="display: none">...</span><br>
+        <span id="leaderboard-x" style="display: none">11. username</span>
+    </div>
+
+    <div class="hidden balances">
+        <div class="meter">
+            <span style="width: 50%" id="xp-progressbar">Level up (10/20)</span>
+        </div>
+        <br>
+        <span class="coins-num" id="balance-coins">10</span><span class="coins-label"> Coins</span>
+        <br>
+        <span class="gold-num" id="balance-gold">0</span><span class="gold-label"> Gold</span>
+    </div>
+
+    <div class="hidden gamefield">
+        <div class="generators">
             <div class="generator" onclick="purchaseGenerator(0)">
                 <span class="generator-label" style="font-size: 17px;">Coin generator</span>
                 <span class="generator-label">Amount: <span class="generator-num" id="generator1-amount">0</span></span>
@@ -45,18 +77,33 @@
             </div>
         </div>
 
-        <div class="upgrades hidden">
-            <div class="upgrade">
-                <span class="upgrade-label" style="font-size: 17px;">123</span>
+        <div class="upgrades">
+            <div class="upgrade" onclick="purchaseUpgrade(0)">
+                <span class="upgrade-label" style="font-size: 17px;">Upgrade Coin generator</span>
+                <span class="upgrade-label">Effect: mult x<span class="upgrade-num">2</span></span>
+                <span class="upgrade-label">Cost: <span class="upgrade-num" id="upgrade1-cost">300</span> <span class="upgrade-label inlineblock">Coins</span></span>
+            </div>
+            <div class="upgrade" onclick="purchaseUpgrade(1)">
+                <span class="upgrade-label" style="font-size: 17px;">Upgrade Coin^2 generator</span>
+                <span class="upgrade-label">Effect: mult x<span class="upgrade-num">2</span></span>
+                <span class="upgrade-label">Cost: <span class="upgrade-num" id="upgrade2-cost">10000</span> <span class="upgrade-label inlineblock">Coins</span></span>
+            </div>
+            <div class="upgrade" onclick="purchaseUpgrade(2)">
+                <span class="upgrade-label" style="font-size: 17px;">Upgrade Coin^3 generator</span>
+                <span class="upgrade-label">Effect: mult x<span class="upgrade-num">2</span></span>
+                <span class="upgrade-label">Cost: <span class="upgrade-num" id="upgrade3-cost">500000</span> <span class="upgrade-label inlineblock">Coins</span></span>
             </div>
         </div>
 
-        <div class="extra hidden">
-            <div class="">
-                <span>egor</span>
+        <div class="extra">
+            <div class="prestiges">
+                <div class="prestige">
+                    <span>prestige</span>
+                    <span>+100</span>
+                    <span>lose all</span>
+                </div>
             </div>
         </div>
-
     </div>
   </body>
 </html>

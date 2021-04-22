@@ -7,9 +7,10 @@ function register () {
             if (response.success) {
                 window.localStorage['_incremental_online_username'] = username
                 window.localStorage['_incremental_online_password'] = password
-                document.getElementsByClassName('register')[0].style.display = 'none'
-                document.getElementsByClassName('balances')[0].style.display = ''
-                document.getElementsByClassName('generators')[0].style.display = ''
+                document.getElementsByClassName('register')[0].classList.add('hidden')
+                document.getElementsByClassName('balances')[0].classList.remove('hidden')
+                document.getElementsByClassName('gamefield')[0].classList.remove('hidden')
+                document.getElementsByClassName('open-button')[0].classList.remove('hidden')
             }
             else {
                 alert(response.message)
@@ -30,9 +31,9 @@ function login (alerted) {
                 tick()
                 document.getElementsByClassName('register')[0].classList.add('hidden')
                 document.getElementsByClassName('balances')[0].classList.remove('hidden')
-                document.getElementsByClassName('generators')[0].classList.remove('hidden')
-                document.getElementsByClassName('upgrades')[0].classList.remove('hidden')
-                setInterval(tick, 200)
+                document.getElementsByClassName('gamefield')[0].classList.remove('hidden')
+                document.getElementsByClassName('open-button')[0].classList.remove('hidden')
+                setInterval(tick, 30)
             }
             else if (alerted) {
                 alert(response.message)
@@ -57,12 +58,20 @@ function tick () {
     }
 
     document.getElementById('balance-coins').textContent = normalize(data['balances']['coins'])
+    document.getElementById('balance-gold').textContent = normalize(data['balances']['gold'])
+
     for (let i = 0; i < 3; i += 1) {
         document.getElementById('generator' + (i + 1) + '-amount').textContent = normalize(data['generators'][i]['amount'])
         document.getElementById('generator' + (i + 1) + '-mult').textContent = normalize(data['generators'][i]['mult'])
         document.getElementById('generator' + (i + 1) + '-producing').textContent = normalize(data['generators'][i]['amount'].times(data['generators'][i]['mult']).times(data['mult']))
         document.getElementById('generator' + (i + 1) + '-cost').textContent = normalize((BigNumber(10).pow(i * 2 + 1)).times(BigNumber(1.1).pow(data['generators'][i]['bought'])))
     }
+    for (let i = 0; i < 3; i += 1) {
+        document.getElementById('upgrade' + (i + 1) + '-cost').textContent = normalize(data['upgrades'][i]['cost'].times(BigNumber(20).pow(data['upgrades'][i]['amount'])))
+    }
+
+    document.getElementById('xp-progressbar').textContent = 'Level up (' + normalize(data['xp']) + ' / ' + normalize(BigNumber(10).times(BigNumber(2).pow(data['level'].minus(1)))) + ')'
+    document.getElementById('xp-progressbar').style.width = data['xp'].div(BigNumber(10).times(BigNumber(2).pow(data['level'].minus(1)))).times(100).toString() + '%'
 }
 
 function reload (d, timestamp) {
@@ -77,8 +86,16 @@ function reload (d, timestamp) {
             'mult': new BigNumber(d['generators'][i]['mult'])
         }
     }
+    data['upgrades'] = []
+    for (let i = 0; i < 3; i += 1) {
+        data['upgrades'][i] = {
+            'amount': new BigNumber(d['upgrades'][i]['amount']),
+            'cost': new BigNumber(d['upgrades'][i]['cost'])
+        }
+    }
     data['mult'] = new BigNumber(d['mult'])
     data['xp'] = new BigNumber(d['xp'])
+    data['level'] = new BigNumber(d['level'])
     data['last_tick'] = timestamp
 }
 
@@ -97,12 +114,61 @@ function purchaseGenerator (i) {
         })
 }
 
+function purchaseUpgrade (i) {
+    let username = window.localStorage['_incremental_online_username']
+    let password = window.localStorage['_incremental_online_password']
+    fetch('http://localhost:1337/purchaseupgrade?username=' + username + '&password=' + password + '&index=' + i)
+        .then(response => response.json())
+        .then(response => {
+            if (response.success) {
+                reload(response.data, response.timestamp)
+            }
+            else {
+                alert(response.message)
+            }
+        })
+}
+
+function openLeaderboard () {
+    let username = window.localStorage['_incremental_online_username']
+    let password = window.localStorage['_incremental_online_password']
+    fetch('http://localhost:1337/leaderboard?username=' + username + '&password=' + password)
+        .then(response => response.json())
+        .then(response => {
+            if (response.success) {
+                reload(response.data['data'], response.timestamp)
+
+                let lb = response.data['leaderboard']
+                console.log(lb)
+                if (lb.length < 10) m = lb.length
+                else m = 10
+
+                for (let i = 1; i <= m; i += 1) {
+                    document.getElementById('leaderboard-' + i).textContent = lb[i - 1][0] + ' — ' + normalize(BigNumber(lb[i - 1][1])) + ' Coins'
+                }
+                if (lb.length > 10) {
+
+                }
+
+                document.getElementsByClassName('leaderboard')[0].style.display = ''
+            }
+            else {
+                alert(response.message)
+            }
+        })
+}
+
+function closeLeaderboard () {
+    document.getElementsByClassName('leaderboard')[0].style.display = 'none';
+}
+
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR })
 var data = {}
 
 window.onload = () => {
-    let y = document.getElementsByClassName('generators')[0].offsetTop
-    document.getElementsByClassName('upgrades')[0].style.top = y + 10 + 'px';
+    let w = document.getElementsByClassName('links')[0].clientWidth;
+    w = w / 2;
+    document.getElementsByClassName('links')[0].style.left = 'calc(50% - ' + w + 'px)'
 
     if (window.localStorage.getItem('_incremental_online_username') != null) {
         let username = window.localStorage.getItem('_incremental_online_username')

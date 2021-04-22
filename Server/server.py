@@ -22,12 +22,14 @@ cur.execute("""CREATE TABLE IF NOT EXISTS Users (
 CHARS = set(ascii_letters + digits)
 GAME_DATA = json.dumps({
     'balances': {
-        'coins': 10,
+        'coins': 500,
         'gold': 0
     },
     'xp': 0,
+    'level': 1,
     'mult': 1,
-    'generators': [{'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}]
+    'generators': [{'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}],
+    'upgrades': [{'amount': 0, 'cost': 300}, {'amount': 0, 'cost': 10000}, {'amount': 0, 'cost': 500000}],
 })
 TICKSPEED = 10
 
@@ -63,6 +65,7 @@ def calculate(username):
     last_time, game_data = user[2], user[3]
     d = json.loads(game_data)
     gs = d['generators']
+    us = d['upgrades']
 
     t = int((timestamp() - last_time) / (1000 / TICKSPEED))
 
@@ -80,6 +83,11 @@ def calculate(username):
             gs[i - 1]['amount'] += (gs[i]['amount'] * gs[i]['mult']) / TICKSPEED * tick_mult
         last_time += 1000 // TICKSPEED
         t = timestamp()
+
+    while d['xp'] >= 10 * 2 ** (d['level'] - 1):
+        d['xp'] -= 10 * 2 ** (d['level'] - 1)
+        d['balances']['gold'] += d['level']
+        d['level'] += 1
 
     cur.execute(f"""UPDATE Users SET
                     last_time = {t},
@@ -176,6 +184,68 @@ def purchasegenerator_route():
 
     data, timestamp_ = calculate(username)
     return response(success=True, data=data, timestamp_=timestamp_)
+
+
+@app.route('/purchaseupgrade', methods=['GET'])
+def purchaseupgrade_route():
+    username = request.args.get('username', '')
+    password = request.args.get('password', '')
+    index = request.args.get('index', '-1')
+
+    if not index.isdigit() or int(index) < 0 or int(index) > 2:
+        return response(success=False, message='wrong index')
+
+    index = int(index)
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
+    data, timestamp_ = calculate(username)
+
+    upgrade = data['upgrades'][index]
+    generator = data['generators'][index]
+
+    if data['balances']['coins'] < upgrade['cost'] * 20 ** upgrade['amount']:
+        return response(success=False, message='not enough coins')
+
+    data['balances']['coins'] -= upgrade['cost'] * 20 ** upgrade['amount']
+    upgrade['amount'] += 1
+    generator['mult'] *= 2
+    data['xp'] += 5 * data['mult']
+
+    cur.execute(f"""UPDATE Users SET
+                    game_data = '{json.dumps(data)}'
+                    WHERE username = '{username}'""")
+
+    data, timestamp_ = calculate(username)
+    return response(success=True, data=data, timestamp_=timestamp_)
+
+
+@app.route('/leaderboard', methods=['GET'])
+def leaderboard_route():
+    username = request.args.get('username', '')
+    password = request.args.get('password', '')
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
+    data, timestamp_ = calculate(username)
+
+    users = cur.execute('SELECT `username`, `game_data` FROM Users').fetchall()
+    users = [(i, json.loads(j)['balances']['coins']) for i, j in users]
+    users.sort(key=lambda u: u[1], reverse=True)
+    i = [i[0] for i in users].index(username)
+    if i >= 10:
+        users = users[:10] + users[i]
+    else:
+        users = users[:10]
+
+    resp = {'data': data, 'leaderboard': users}
+    return response(success=True, data=resp, timestamp_=timestamp_)
 
 
 if __name__ == '__main__':
