@@ -24,14 +24,14 @@ cur.execute("""CREATE TABLE IF NOT EXISTS Users (
 CHARS = set(ascii_letters + digits)
 GAME_DATA = json.dumps({
     'balances': {
-        'coins': 500,
+        'coins': 10,
         'gold': 0
     },
     'xp': 0,
     'level': 1,
     'mult': 1,
     'generators': [{'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}, {'amount': 0, 'bought': 0, 'mult': 1}],
-    'upgrades': [{'amount': 0, 'cost': 300}, {'amount': 0, 'cost': 10000}, {'amount': 0, 'cost': 500000}],
+    'upgrades': [{'amount': 0, 'cost': 300}, {'amount': 0, 'cost': 10000}, {'amount': 0, 'cost': 500000}, {'amount': 0, 'cost': 10}],
 })
 TICKSPEED = 10
 
@@ -175,10 +175,10 @@ def purchasegenerator_route():
 
     generator = data['generators'][index]
 
-    if data['balances']['coins'] < (10 ** (index * 2 + 1)) * 1.1 ** generator['bought']:
+    if data['balances']['coins'] < (10 ** (index * 2 + 1)) * 1.25 ** generator['bought']:
         return response(success=False, message='not enough coins')
 
-    data['balances']['coins'] -= (10 ** (index * 2 + 1)) * 1.1 ** generator['bought']
+    data['balances']['coins'] -= (10 ** (index * 2 + 1)) * 1.25 ** generator['bought']
     generator['amount'] += 1
     generator['bought'] += 1
     data['xp'] += 1 * data['mult']
@@ -204,7 +204,7 @@ def purchaseupgrade_route():
 
     index = request.args.get('index', '-1')
 
-    if not index.isdigit() or int(index) < 0 or int(index) > 2:
+    if not index.isdigit() or int(index) < 0 or int(index) > 3:
         return response(success=False, message='wrong index')
 
     index = int(index)
@@ -212,15 +212,25 @@ def purchaseupgrade_route():
     data, timestamp_ = calculate(username)
 
     upgrade = data['upgrades'][index]
-    generator = data['generators'][index]
 
-    if data['balances']['coins'] < upgrade['cost'] * 20 ** upgrade['amount']:
-        return response(success=False, message='not enough coins')
+    if index < 3:
+        generator = data['generators'][index]
 
-    data['balances']['coins'] -= upgrade['cost'] * 20 ** upgrade['amount']
-    upgrade['amount'] += 1
-    generator['mult'] *= 2
-    data['xp'] += 5 * data['mult']
+        if data['balances']['coins'] < upgrade['cost'] * 20 ** upgrade['amount']:
+            return response(success=False, message='not enough coins')
+
+        data['balances']['coins'] -= upgrade['cost'] * 20 ** upgrade['amount']
+        upgrade['amount'] += 1
+        generator['mult'] *= 2
+        data['xp'] += 5 * data['mult']
+    else:
+        if data['balances']['gold'] < upgrade['cost'] * 2 ** upgrade['amount']:
+            return response(success=False, message='not enough gold')
+
+        data['balances']['gold'] -= upgrade['cost'] * 2 ** upgrade['amount']
+        upgrade['amount'] += 1
+        data['xp'] += 10 * data['mult']
+        data['mult'] *= 2
 
     cur.execute(f"""UPDATE Users SET
                     game_data = '{json.dumps(data)}'
@@ -268,9 +278,12 @@ def prestige_route():
 
     data, timestamp_ = calculate(username)
 
-    coins, gold = data['balances']['coins'], data['balances']['gold']
+    coins, gold, mult = (data['balances']['coins'],
+                         data['balances']['gold'],
+                         data['mult'])
     data = json.loads(GAME_DATA)
     data['balances']['gold'] = gold + max(0, log10(coins / 1000000))
+    data['mult'] = mult
 
     cur.execute(f"""UPDATE Users SET
                     last_time = {timestamp_},

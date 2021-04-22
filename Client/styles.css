@@ -36,7 +36,8 @@ button {
 }
 
 .open-button {
-    z-index: 1000;
+    z-index: 999;
+    margin-left: 10px;
     position: absolute;
     top: 60px;
     width: 100px;
@@ -136,7 +137,7 @@ button {
 
 .upgrades {
     position: absolute;
-    top: 150px;
+    top: 139px;
     left: calc(50% - 134.375px);
 }
 
@@ -169,7 +170,7 @@ button {
 .extra {
     margin-top: 30px;
     width: 300px;
-    height: 470px;
+    height: 350px;
     margin-right: 10px;
     border-width: 2px;
     border-radius: 4px;
@@ -194,11 +195,14 @@ button {
 
 .meter {
   height: 22px;
+  margin-left: 10px;
+  margin-right: 10px;
   position: relative;
   background: #555;
   border-radius: 3px;
   padding: 3px;
-  box-shadow: inset 0 -1px 1px rgba(255, 255, 255, 0.3);
+  vertical-align: middle;
+  line-height: 22px;
 }
 
 .meter > span {
@@ -251,8 +255,28 @@ button {
     border-radius: 4px;
     border-style: solid;
     border-color: #132612;
+    cursor: pointer;
 }
 
 .dicebet input {
     display: inline-block;
+}
+
+.goldupgrade {
+    background-color: #6cf564;
+    padding: 15px 20px;
+    border-width: 2px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #132612;
+    cursor: pointer;
+}
+
+.goldupgrade-num {
+    font-size: 20px;
+    color: red;
+}
+
+.extra-title {
+    font-size: 22px;
 }

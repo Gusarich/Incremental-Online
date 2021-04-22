@@ -97,17 +97,22 @@
 
         <div class="extra">
             <div class="prestige" onclick="prestige()">
-                <span style="font-size: 22px;">Prestige</span><br>
+                <span class="extra-title">Prestige</span><br>
                 <span>Reset progress</span><br>
                 <span>Get </span><span class="prestige-num">0</span> <span>Gold</span>
             </div>
             <div class="dicebet">
-                <span style="font-size: 22px;">Dice</span><br>
+                <span class="extra-title">Dice</span><br>
                 Amount: <input style="width: 70px;" type="number" id="amount" value="1"><br>
                 Chance: <input style="width: 30px;" type="number" id="chance" value="75">
                 <div class="dicebet-button" onclick="dicebet()">
                     Roll the dice!
                 </div>
+            </div>
+            <div class="goldupgrade" onclick="purchaseUpgrade(3)">
+                <span class="extra-title">Golden upgrade</span><br>
+                <span>Effect: Coin mult x2</span><br>
+                <span>Cost: </span><span class="goldupgrade-num">10</span> <span>Gold</span>
             </div>
         </div>
     </div>

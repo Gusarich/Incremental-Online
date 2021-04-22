@@ -65,7 +65,7 @@ function tick () {
         document.getElementById('generator' + (i + 1) + '-amount').textContent = normalize(data['generators'][i]['amount'])
         document.getElementById('generator' + (i + 1) + '-mult').textContent = normalize(data['generators'][i]['mult'])
         document.getElementById('generator' + (i + 1) + '-producing').textContent = normalize(data['generators'][i]['amount'].times(data['generators'][i]['mult']).times(data['mult']))
-        document.getElementById('generator' + (i + 1) + '-cost').textContent = normalize((BigNumber(10).pow(i * 2 + 1)).times(BigNumber(1.1).pow(data['generators'][i]['bought'])))
+        document.getElementById('generator' + (i + 1) + '-cost').textContent = normalize((BigNumber(10).pow(i * 2 + 1)).times(BigNumber(1.25).pow(data['generators'][i]['bought'])))
     }
     for (let i = 0; i < 3; i += 1) {
         document.getElementById('upgrade' + (i + 1) + '-cost').textContent = normalize(data['upgrades'][i]['cost'].times(BigNumber(20).pow(data['upgrades'][i]['amount'])))
@@ -75,6 +75,7 @@ function tick () {
     document.getElementById('xp-progressbar').style.width = data['xp'].div(BigNumber(10).times(BigNumber(2).pow(data['level'].minus(1)))).times(100).toString() + '%'
 
     document.getElementsByClassName('prestige-num')[0].textContent = normalize(BigNumber.max(0, Math.log10(data['balances']['coins'].div('1e6'))))
+    document.getElementsByClassName('goldupgrade-num')[0].textContent = normalize(BigNumber(10).times(BigNumber(2).pow(data['upgrades'][3]['amount'])))
 }
 
 function reload (d, timestamp) {
@@ -90,7 +91,7 @@ function reload (d, timestamp) {
         }
     }
     data['upgrades'] = []
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 4; i += 1) {
         data['upgrades'][i] = {
             'amount': new BigNumber(d['upgrades'][i]['amount']),
             'cost': new BigNumber(d['upgrades'][i]['cost'])
