@@ -2,6 +2,8 @@ from flask import Flask, request
 from hashlib import sha256
 from string import ascii_letters, digits, punctuation
 from time import time
+from math import log10
+from random import randint
 import json
 import sqlite3
 
@@ -93,6 +95,7 @@ def calculate(username):
                     last_time = {t},
                     game_data = '{json.dumps(d)}'
                     WHERE username = '{username}'""")
+    con.commit()
 
     return d, t
 
@@ -128,6 +131,7 @@ def register_route():
             {timestamp()},
             '{GAME_DATA}'
         )""")
+        con.commit()
     except Exception as e:
         print(e)
         return response(success=False, message='unknown error')
@@ -154,17 +158,18 @@ def calculate_route():
 def purchasegenerator_route():
     username = request.args.get('username', '')
     password = request.args.get('password', '')
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
     index = request.args.get('index', '-1')
 
     if not index.isdigit() or int(index) < 0 or int(index) > 2:
         return response(success=False, message='wrong index')
 
     index = int(index)
-
-    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
-                           username = '{username}' AND
-                           password_hash = '{hash(password)}'""").fetchone():
-        return response(success=False, message='wrong username or password')
 
     data, timestamp_ = calculate(username)
 
@@ -181,6 +186,7 @@ def purchasegenerator_route():
     cur.execute(f"""UPDATE Users SET
                     game_data = '{json.dumps(data)}'
                     WHERE username = '{username}'""")
+    con.commit()
 
     data, timestamp_ = calculate(username)
     return response(success=True, data=data, timestamp_=timestamp_)
@@ -190,17 +196,18 @@ def purchasegenerator_route():
 def purchaseupgrade_route():
     username = request.args.get('username', '')
     password = request.args.get('password', '')
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
     index = request.args.get('index', '-1')
 
     if not index.isdigit() or int(index) < 0 or int(index) > 2:
         return response(success=False, message='wrong index')
 
     index = int(index)
-
-    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
-                           username = '{username}' AND
-                           password_hash = '{hash(password)}'""").fetchone():
-        return response(success=False, message='wrong username or password')
 
     data, timestamp_ = calculate(username)
 
@@ -218,6 +225,7 @@ def purchaseupgrade_route():
     cur.execute(f"""UPDATE Users SET
                     game_data = '{json.dumps(data)}'
                     WHERE username = '{username}'""")
+    con.commit()
 
     data, timestamp_ = calculate(username)
     return response(success=True, data=data, timestamp_=timestamp_)
@@ -246,6 +254,75 @@ def leaderboard_route():
 
     resp = {'data': data, 'leaderboard': users}
     return response(success=True, data=resp, timestamp_=timestamp_)
+
+
+@app.route('/prestige', methods=['GET'])
+def prestige_route():
+    username = request.args.get('username', '')
+    password = request.args.get('password', '')
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
+    data, timestamp_ = calculate(username)
+
+    coins, gold = data['balances']['coins'], data['balances']['gold']
+    data = json.loads(GAME_DATA)
+    data['balances']['gold'] = gold + max(0, log10(coins / 1000000))
+
+    cur.execute(f"""UPDATE Users SET
+                    last_time = {timestamp_},
+                    game_data = '{json.dumps(data)}'
+                    WHERE username = '{username}'""")
+    con.commit()
+
+    return response(success=True, data=data, timestamp_=timestamp_)
+
+
+@app.route('/dicebet', methods=['GET'])
+def dicebet_route():
+    username = request.args.get('username', '')
+    password = request.args.get('password', '')
+
+    if not cur.execute(f"""SELECT password_hash FROM Users WHERE
+                           username = '{username}' AND
+                           password_hash = '{hash(password)}'""").fetchone():
+        return response(success=False, message='wrong username or password')
+
+    chance = request.args.get('chance', 'a')
+    amount = request.args.get('amount', 'a')
+
+    if not (chance.isdigit() and amount.isdigit()):
+        return response(success=False, message='chance and amount must be integers')
+
+    chance = int(chance)
+    amount = int(amount)
+
+    if not 0 < chance < 100:
+        return response(success=False, message='chance must be 1-99')
+
+    data, timestamp_ = calculate(username)
+
+    if amount < 1:
+        return response(success=False, message='amount must be 1+')
+    if amount > data['balances']['coins']:
+        return response(success=False, message='not enough coins')
+
+    rnd = randint(1, 100)
+    if rnd <= chance:
+        data['balances']['coins'] += amount * (100 / chance - 1) # win
+    else:
+        data['balances']['coins'] -= amount # lose
+
+    cur.execute(f"""UPDATE Users SET
+                    last_time = {timestamp_},
+                    game_data = '{json.dumps(data)}'
+                    WHERE username = '{username}'""")
+    con.commit()
+
+    return response(success=True, data=data, timestamp_=timestamp_)
 
 
 if __name__ == '__main__':

@@ -11,6 +11,7 @@ function register () {
                 document.getElementsByClassName('balances')[0].classList.remove('hidden')
                 document.getElementsByClassName('gamefield')[0].classList.remove('hidden')
                 document.getElementsByClassName('open-button')[0].classList.remove('hidden')
+                setInterval(tick, 30)
             }
             else {
                 alert(response.message)
@@ -146,8 +147,19 @@ function openLeaderboard () {
                 for (let i = 1; i <= m; i += 1) {
                     document.getElementById('leaderboard-' + i).textContent = lb[i - 1][0] + ' — ' + normalize(BigNumber(lb[i - 1][1])) + ' Coins'
                 }
-                if (lb.length > 10) {
 
+                if (lb.length > 10) {
+                    document.getElementById('leaderboard-x').textContent = lb[10][2] + '. ' + lb[10][0] + ' — ' + normalize(BigNumber(lb[10][1])) + ' Coins'
+                    document.getElementsByClassName('leaderboard-x')[0].style.display = ''
+                    document.getElementsByClassName('leaderboard-x')[1].style.display = ''
+                    document.getElementsByClassName('leaderboard')[0].style.height = '366px';
+                    document.getElementsByClassName('leaderboard')[0].style.top = 'calc(50% - 183px)';
+                }
+                else {
+                    document.getElementsByClassName('leaderboard-x')[0].style.display = 'none'
+                    document.getElementsByClassName('leaderboard-x')[1].style.display = 'none'
+                    document.getElementsByClassName('leaderboard')[0].style.height = '310px';
+                    document.getElementsByClassName('leaderboard')[0].style.top = 'calc(50% - 155px)';
                 }
 
                 document.getElementsByClassName('leaderboard')[0].style.display = ''
@@ -160,6 +172,39 @@ function openLeaderboard () {
 
 function closeLeaderboard () {
     document.getElementsByClassName('leaderboard')[0].style.display = 'none';
+}
+
+function prestige () {
+    let username = window.localStorage['_incremental_online_username']
+    let password = window.localStorage['_incremental_online_password']
+    fetch('http://localhost:1337/prestige?username=' + username + '&password=' + password)
+        .then(response => response.json())
+        .then(response => {
+            if (response.success) {
+                reload(response.data, response.timestamp)
+            }
+            else {
+                alert(response.message)
+            }
+        })
+}
+
+function dicebet () {
+    let username = window.localStorage['_incremental_online_username']
+    let password = window.localStorage['_incremental_online_password']
+
+    let chance = 123;
+
+    fetch('http://localhost:1337/prestige?username=' + username + '&password=' + password)
+        .then(response => response.json())
+        .then(response => {
+            if (response.success) {
+                reload(response.data, response.timestamp)
+            }
+            else {
+                alert(response.message)
+            }
+        })
 }
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_FLOOR })
