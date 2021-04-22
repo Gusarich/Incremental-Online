@@ -220,3 +220,39 @@ button {
     position: relative;
     overflow: hidden;
 }
+
+.prestige {
+    background-color: #6cf564;
+    padding: 15px 20px;
+    border-width: 2px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #132612;
+    cursor: pointer;
+}
+
+.prestige-num {
+    color: red;
+}
+
+.dicebet {
+    background-color: #6cf564;
+    padding: 15px 20px;
+    border-width: 2px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #132612;
+}
+
+.dicebet-button {
+    background-color: #2c3564;
+    padding: 5px 10px;
+    border-width: 2px;
+    border-radius: 4px;
+    border-style: solid;
+    border-color: #132612;
+}
+
+.dicebet input {
+    display: inline-block;
+}

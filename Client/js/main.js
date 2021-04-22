@@ -73,6 +73,8 @@ function tick () {
 
     document.getElementById('xp-progressbar').textContent = 'Level up (' + normalize(data['xp']) + ' / ' + normalize(BigNumber(10).times(BigNumber(2).pow(data['level'].minus(1)))) + ')'
     document.getElementById('xp-progressbar').style.width = data['xp'].div(BigNumber(10).times(BigNumber(2).pow(data['level'].minus(1)))).times(100).toString() + '%'
+
+    document.getElementsByClassName('prestige-num')[0].textContent = normalize(BigNumber.max(0, Math.log10(data['balances']['coins'].div('1e6'))))
 }
 
 function reload (d, timestamp) {
@@ -145,11 +147,11 @@ function openLeaderboard () {
                 else m = 10
 
                 for (let i = 1; i <= m; i += 1) {
-                    document.getElementById('leaderboard-' + i).textContent = lb[i - 1][0] + ' — ' + normalize(BigNumber(lb[i - 1][1])) + ' Coins'
+                    document.getElementById('leaderboard-' + i).textContent = lb[i - 1][0] + ' — ' + normalize(BigNumber(lb[i - 1][1])) + ' Gold'
                 }
 
                 if (lb.length > 10) {
-                    document.getElementById('leaderboard-x').textContent = lb[10][2] + '. ' + lb[10][0] + ' — ' + normalize(BigNumber(lb[10][1])) + ' Coins'
+                    document.getElementById('leaderboard-x').textContent = lb[10][2] + '. ' + lb[10][0] + ' — ' + normalize(BigNumber(lb[10][1])) + ' Gold'
                     document.getElementsByClassName('leaderboard-x')[0].style.display = ''
                     document.getElementsByClassName('leaderboard-x')[1].style.display = ''
                     document.getElementsByClassName('leaderboard')[0].style.height = '366px';
@@ -193,9 +195,10 @@ function dicebet () {
     let username = window.localStorage['_incremental_online_username']
     let password = window.localStorage['_incremental_online_password']
 
-    let chance = 123;
+    let amount = document.getElementById('amount').value;
+    let chance = document.getElementById('chance').value;
 
-    fetch('http://localhost:1337/prestige?username=' + username + '&password=' + password)
+    fetch('http://localhost:1337/dicebet?username=' + username + '&password=' + password + '&amount=' + amount + '&chance=' + chance)
         .then(response => response.json())
         .then(response => {
             if (response.success) {

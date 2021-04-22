@@ -39,7 +39,7 @@
         9. <span id="leaderboard-9"></span><br>
         10. <span id="leaderboard-10"></span><br>
         <span class="leaderboard-x" style="display: none">...</span><br>
-        <span id="leaderboard-x" class="leaderboard-x" style="display: none">11. username</span>
+        <span id="leaderboard-x" class="leaderboard-x" style="display: none"></span>
     </div>
 
     <div class="hidden balances">
@@ -96,11 +96,17 @@
         </div>
 
         <div class="extra">
-            <div class="prestiges">
-                <div class="prestige">
-                    <span>prestige</span>
-                    <span>+100</span>
-                    <span>lose all</span>
+            <div class="prestige" onclick="prestige()">
+                <span style="font-size: 22px;">Prestige</span><br>
+                <span>Reset progress</span><br>
+                <span>Get </span><span class="prestige-num">0</span> <span>Gold</span>
+            </div>
+            <div class="dicebet">
+                <span style="font-size: 22px;">Dice</span><br>
+                Amount: <input style="width: 70px;" type="number" id="amount" value="1"><br>
+                Chance: <input style="width: 30px;" type="number" id="chance" value="75">
+                <div class="dicebet-button" onclick="dicebet()">
+                    Roll the dice!
                 </div>
             </div>
         </div>

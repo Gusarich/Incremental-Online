@@ -244,7 +244,7 @@ def leaderboard_route():
     data, timestamp_ = calculate(username)
 
     users = cur.execute('SELECT `username`, `game_data` FROM Users').fetchall()
-    users = [(i, json.loads(j)['balances']['coins']) for i, j in users]
+    users = [(i, json.loads(j)['balances']['gold']) for i, j in users]
     users.sort(key=lambda u: u[1], reverse=True)
     i = [i[0] for i in users].index(username)
     if i >= 10:
@@ -316,11 +316,15 @@ def dicebet_route():
     else:
         data['balances']['coins'] -= amount # lose
 
+    data['xp'] += 2
+
     cur.execute(f"""UPDATE Users SET
                     last_time = {timestamp_},
                     game_data = '{json.dumps(data)}'
                     WHERE username = '{username}'""")
     con.commit()
+
+    data, timestamp_ = calculate(username)
 
     return response(success=True, data=data, timestamp_=timestamp_)
 
